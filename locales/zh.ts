@@ -40,6 +40,10 @@ export const zh = {
             title: "单词阶梯",
             description: "每次改一个字母，把两个词连起来！"
         },
+        battleship: {
+            title: "海战棋",
+            description: "藏好自己的舰队，击沉对手的所有战舰！"
+        },
         comingSoon: {
             title: "敬请期待...",
             description: "更多好玩的游戏正在开发中！"
@@ -60,6 +64,32 @@ export const zh = {
         yourScore: "你的得分: {score}",
         waiting: "等待对手",
         yourTurn: "你的回合"
+    },
+    battleshipGame: {
+        passDevice: "请把设备递过去",
+        handoffTo: "传给 {name}",
+        handoffPlaceMsg: "轮到你布置舰队啦。确认只有你看到屏幕后再点准备。",
+        handoffFireMsg: "轮到你开炮啦。确认只有你看到屏幕后再点准备。",
+        readyButton: "我准备好了",
+        placementHint: "选一艘船，然后在棋盘上点击放下。点击已放置的船可把它收回。",
+        shipsTitle: "你的战舰",
+        placed: "已放置 — 点击移动",
+        pick: "点击放置",
+        orientationHorizontal: "横向 ↔ (按 R 切换)",
+        orientationVertical: "纵向 ↕ (按 R 切换)",
+        rotateHint: "旋转方向 (R)",
+        yourFleet: "你的舰队",
+        enemyFleet: "敌方舰队",
+        shuffle: "随机摆放",
+        clear: "全部清除",
+        confirmPlacement: "确认布阵",
+        enemyWaters: "敌方海域 — 选择目标",
+        yourWaters: "{name} 的海域",
+        hit: "命中！",
+        miss: "未中。",
+        sunk: "击沉一艘！",
+        endTurn: "结束回合",
+        hitsTaken: "被击中: {n} / {total}"
     },
     wordLadderGame: {
         startWord: "起始词",
@@ -120,6 +150,15 @@ export const zh = {
             gameplay_3: "选择正确的数字牌后，点击“确认选择”。这些牌将被关闭。然后你再次掷骰子。",
             gameplay_4: "如果你7到9的数字牌都已关闭，你可以选择只掷一个骰子。",
             winning: "当你的掷骰结果无法匹配任何未关闭的数字牌组合时，你的回合结束。你的分数是剩下未关闭数字牌的总和。分数较低的玩家获胜。得0分（所有牌都关闭）称为“关门大吉”！"
+        },
+        battleship: {
+            title: "海战棋规则",
+            objective: "率先击沉对手所有的战舰。",
+            gameplay_1: "每位玩家在 8×8 的棋盘上布置 5 艘战舰（长度分别为 5、4、3、3、2）。可以多次点击重新摆放，直到满意。",
+            gameplay_2: "布置完毕后，把设备传给对手，让对手在私下完成布阵。",
+            gameplay_3: "轮到你时，在敌方海域选一个格子开炮。命中显示 ✕，未中显示 ·。",
+            gameplay_4: "每发射一炮后，把设备传回给对手。",
+            winning: "击沉对手所有战舰即可获胜！"
         },
         wordLadder: {
             title: "单词阶梯规则",

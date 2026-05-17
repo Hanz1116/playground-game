@@ -40,6 +40,10 @@ export const en = {
             title: "Word Ladder",
             description: "Change one letter at a time to connect the words!"
         },
+        battleship: {
+            title: "Battleship",
+            description: "Hide your fleet, then sink your opponent's ships!"
+        },
         comingSoon: {
             title: "Coming Soon...",
             description: "More fun games are on the way!"
@@ -60,6 +64,32 @@ export const en = {
         yourScore: "Your Score: {score}",
         waiting: "Waiting for Opponent",
         yourTurn: "Your Turn"
+    },
+    battleshipGame: {
+        passDevice: "Pass the device",
+        handoffTo: "Pass to {name}",
+        handoffPlaceMsg: "It's your turn to place your fleet. Tap Ready when you're alone with the device.",
+        handoffFireMsg: "It's your turn to fire. Tap Ready when you're alone with the device.",
+        readyButton: "I'm Ready",
+        placementHint: "Pick a ship, then click the board to drop it. Click a placed ship to pick it back up.",
+        shipsTitle: "Your Ships",
+        placed: "placed — click to move",
+        pick: "click to place",
+        orientationHorizontal: "Horizontal ↔ (press R)",
+        orientationVertical: "Vertical ↕ (press R)",
+        rotateHint: "Rotate (R)",
+        yourFleet: "Your fleet",
+        enemyFleet: "Enemy fleet",
+        shuffle: "Shuffle",
+        clear: "Clear All",
+        confirmPlacement: "Confirm Fleet",
+        enemyWaters: "Enemy Waters — pick a target",
+        yourWaters: "{name}'s Waters",
+        hit: "Hit!",
+        miss: "Miss.",
+        sunk: "Ship Sunk!",
+        endTurn: "End Turn",
+        hitsTaken: "Hits taken: {n} / {total}"
     },
     wordLadderGame: {
         startWord: "Start Word",
@@ -120,6 +150,15 @@ export const en = {
             gameplay_3: "After selecting the correct tiles, click 'Confirm Move'. These tiles are now closed. You then roll again.",
             gameplay_4: "If all your tiles from 7 to 9 are closed, you may choose to roll only one die.",
             winning: "Your turn ends when you cannot make a valid move. Your score is the sum of your remaining open tiles. The player with the lower score wins. A score of 0 is a 'Shut the Box'!"
+        },
+        battleship: {
+            title: "Battleship Rules",
+            objective: "Be the first to sink all of your opponent's ships.",
+            gameplay_1: "Each player places a fleet of 5 ships (lengths 5, 4, 3, 3, 2) on an 8×8 grid. Tap Shuffle until you like your layout.",
+            gameplay_2: "After placing, pass the device to your opponent so they can place their fleet in private.",
+            gameplay_3: "On your turn, fire at a cell on the enemy waters. The board shows ✕ for hits and · for misses.",
+            gameplay_4: "After each shot, pass the device back to your opponent.",
+            winning: "Sink every one of your opponent's ships to win the battle!"
         },
         wordLadder: {
             title: "Word Ladder Rules",

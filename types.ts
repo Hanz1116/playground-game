@@ -128,3 +128,44 @@ export interface WordLadderGameState {
     errorMessage: string | null;
     winner: WordLadderPlayer | null;
 }
+
+// Types for Battleship Game
+export interface BattleshipShip {
+    id: number;
+    length: number;
+    positions: [number, number][]; // [x, y] cells the ship occupies
+    hits: number;
+}
+
+export interface BattleshipShot {
+    x: number;
+    y: number;
+    hit: boolean;
+}
+
+export interface BattleshipBoard {
+    ships: BattleshipShip[];
+    shotsReceived: BattleshipShot[]; // shots fired AT this board
+}
+
+export interface BattleshipPlayer {
+    id: 1 | 2;
+    name: string;
+    avatar: string;
+    board: BattleshipBoard;
+}
+
+export type BattleshipPhase =
+    | 'PLACING'        // currentPlayerId is placing ships
+    | 'HANDOFF_PLACE'  // pass device to currentPlayerId to place
+    | 'HANDOFF_FIRE'   // pass device to currentPlayerId to fire
+    | 'FIRING'         // currentPlayerId is choosing a target
+    | 'SHOT_RESULT';   // showing the result of a shot before handoff
+
+export interface BattleshipGameState {
+    players: [BattleshipPlayer, BattleshipPlayer];
+    gameStatus: GameStatus;
+    currentPlayerId: 1 | 2;
+    phase: BattleshipPhase;
+    lastShot: { x: number; y: number; hit: boolean; sunkShipId: number | null } | null;
+}

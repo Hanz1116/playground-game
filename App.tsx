@@ -5,10 +5,11 @@ import { MatchingGame } from './components/MatchingGame';
 import { DotsAndBoxesGame } from './components/DotsAndBoxesGame';
 import { ShutTheBoxGame } from './components/ShutTheBoxGame';
 import { WordLadderGame } from './components/WordLadderGame';
+import { BattleshipGame } from './components/BattleshipGame';
 import { useBackgroundMusic } from './hooks/useBackgroundMusic';
 import type { TrackKey } from './hooks/musicTracks';
 
-export type View = 'home' | 'yahtzee' | 'matching' | 'dotsAndBoxes' | 'shutTheBox' | 'wordLadder';
+export type View = 'home' | 'yahtzee' | 'matching' | 'dotsAndBoxes' | 'shutTheBox' | 'wordLadder' | 'battleship';
 
 const SpeakerOnIcon = () => (
     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -51,6 +52,10 @@ const App: React.FC = () => {
         setCurrentView('wordLadder');
     }, []);
 
+    const handleStartBattleship = useCallback(() => {
+        setCurrentView('battleship');
+    }, []);
+
     const handleGoHome = useCallback(() => {
         setCurrentView('home');
     }, []);
@@ -67,14 +72,17 @@ const App: React.FC = () => {
                 return <ShutTheBoxGame onGoHome={handleGoHome} />;
             case 'wordLadder':
                 return <WordLadderGame onGoHome={handleGoHome} />;
+            case 'battleship':
+                return <BattleshipGame onGoHome={handleGoHome} />;
             case 'home':
             default:
-                return <HomeScreen 
-                    onStartYahtzee={handleStartYahtzee} 
-                    onStartMatching={handleStartMatching} 
-                    onStartDotsAndBoxes={handleStartDotsAndBoxes} 
+                return <HomeScreen
+                    onStartYahtzee={handleStartYahtzee}
+                    onStartMatching={handleStartMatching}
+                    onStartDotsAndBoxes={handleStartDotsAndBoxes}
                     onStartShutTheBox={handleStartShutTheBox}
                     onStartWordLadder={handleStartWordLadder}
+                    onStartBattleship={handleStartBattleship}
                 />;
         }
     };

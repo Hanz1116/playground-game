@@ -5,7 +5,7 @@ import * as Tone from 'tone';
 // that tears everything down. The hook calls these on track switch.
 
 export type TrackKey =
-  | 'home' | 'yahtzee' | 'matching' | 'dotsAndBoxes' | 'shutTheBox' | 'wordLadder';
+  | 'home' | 'yahtzee' | 'matching' | 'dotsAndBoxes' | 'shutTheBox' | 'wordLadder' | 'battleship';
 
 export type TrackController = { dispose: () => void };
 export type TrackBuilder = (destination: Tone.ToneAudioNode) => TrackController;
@@ -459,6 +459,72 @@ const wordLadder: TrackBuilder = (dest) => {
   };
 };
 
+// BATTLESHIP — naval march in D minor. Brassy lead, marching bass, snare-ish hat.
+const battleship: TrackBuilder = (dest) => {
+  Tone.Transport.bpm.value = 104;
+
+  const reverb = new Tone.Reverb({ decay: 3, wet: 0.3 }).connect(dest);
+
+  const lead = new Tone.Synth({
+    oscillator: { type: 'sawtooth' },
+    envelope: { attack: 0.02, decay: 0.3, sustain: 0.5, release: 0.4 },
+    volume: -12,
+  }).connect(new Tone.Filter(2200, 'lowpass').connect(reverb));
+
+  const bass = new Tone.MonoSynth({
+    oscillator: { type: 'square' },
+    envelope: { attack: 0.01, decay: 0.2, sustain: 0.4, release: 0.3 },
+    filterEnvelope: { attack: 0.01, decay: 0.2, sustain: 0.3, release: 0.3, baseFrequency: 130, octaves: 2 },
+    volume: -16,
+  }).connect(reverb);
+
+  const snare = new Tone.NoiseSynth({
+    noise: { type: 'white' },
+    envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.05 },
+    volume: -28,
+  }).connect(new Tone.Filter(2000, 'highpass').connect(reverb));
+
+  const melPart = makeMelodyPart(lead, [
+    ['D4', 1], ['D4', 0.5], ['F4', 0.5], ['A4', 1], ['D5', 1],
+    ['C5', 0.5], ['Bb4', 0.5], ['A4', 1], ['G4', 1], ['F4', 1],
+    ['E4', 1], ['F4', 1], ['G4', 1], ['A4', 1],
+    ['F4', 1], ['D4', 1], ['A3', 2],
+    ['D4', 1], ['F4', 0.5], ['A4', 0.5], ['D5', 1], ['F5', 1],
+    ['E5', 0.5], ['D5', 0.5], ['C5', 1], ['Bb4', 1], ['A4', 1],
+    ['G4', 0.5], ['A4', 0.5], ['Bb4', 1], ['A4', 1], ['G4', 1],
+    ['F4', 1], ['E4', 1], ['D4', 2],
+  ]);
+
+  const bassPart = makeMelodyPart(bass as any, [
+    ['D2', 1], ['D2', 1], ['A2', 1], ['A2', 1],
+    ['Bb2', 1], ['Bb2', 1], ['F2', 1], ['F2', 1],
+    ['G2', 1], ['G2', 1], ['A2', 1], ['A2', 1],
+    ['D2', 1], ['A2', 1], ['D2', 2],
+  ]);
+
+  // Snare on every downbeat
+  const snareEvents: Array<[string, null]> = [];
+  for (let beat = 0; beat < 8; beat++) {
+    snareEvents.push([beatsToBBS(beat), null]);
+  }
+  const snarePart = new Tone.Part((time) => {
+    snare.triggerAttackRelease('16n', time);
+  }, snareEvents as any);
+  snarePart.loop = true;
+  snarePart.loopEnd = '2m';
+  snarePart.start('+0');
+
+  return {
+    dispose: () => {
+      melPart.stop(); melPart.dispose();
+      bassPart.stop(); bassPart.dispose();
+      snarePart.stop(); snarePart.dispose();
+      lead.dispose(); bass.dispose(); snare.dispose();
+      reverb.dispose();
+    },
+  };
+};
+
 export const TRACKS: Record<TrackKey, TrackBuilder> = {
-  home, yahtzee, matching, dotsAndBoxes, shutTheBox, wordLadder,
+  home, yahtzee, matching, dotsAndBoxes, shutTheBox, wordLadder, battleship,
 };

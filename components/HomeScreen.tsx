@@ -9,6 +9,7 @@ interface HomeScreenProps {
     onStartDotsAndBoxes: () => void;
     onStartShutTheBox: () => void;
     onStartWordLadder: () => void;
+    onStartBattleship: () => void;
 }
 
 const GameCard: React.FC<{
@@ -35,7 +36,7 @@ const GameCard: React.FC<{
     );
 };
 
-export const HomeScreen: React.FC<HomeScreenProps> = ({ onStartYahtzee, onStartMatching, onStartDotsAndBoxes, onStartShutTheBox, onStartWordLadder }) => {
+export const HomeScreen: React.FC<HomeScreenProps> = ({ onStartYahtzee, onStartMatching, onStartDotsAndBoxes, onStartShutTheBox, onStartWordLadder, onStartBattleship }) => {
     const { t } = useI18n();
 
     return (
@@ -79,17 +80,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onStartYahtzee, onStartM
                     onClick={onStartShutTheBox}
                     emoji="📦"
                 />
-                <GameCard 
+                <GameCard
                     title={t('games.wordLadder.title')}
                     description={t('games.wordLadder.description')}
                     onClick={onStartWordLadder}
                     emoji="🪜"
                 />
-                <GameCard 
-                    title={t('games.comingSoon.title')}
-                    description={t('games.comingSoon.description')}
-                    emoji="🤔"
-                    comingSoon
+                <GameCard
+                    title={t('games.battleship.title')}
+                    description={t('games.battleship.description')}
+                    onClick={onStartBattleship}
+                    emoji="🚢"
                 />
             </main>
         </div>
