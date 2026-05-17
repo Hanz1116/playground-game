@@ -1,20 +1,52 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 老狗 & 老婆的游乐园 / Playground Game
 
-# Run and deploy your AI Studio app
+A two-player, pass-and-play playground featuring a small collection of classic games. Built with React, TypeScript, Tailwind CSS, and Vite.
 
-This contains everything you need to run your app locally.
+## Games
 
-View your app in AI Studio: https://ai.studio/apps/drive/1B_BfsHf8v37lneTJK5EZwiPCPOrh1bdn
+- **Yahtzee** — full scoring logic, three rolls per turn, hold/re-roll dice
+- **Dots and Boxes** — claim boxes by completing the fourth side
+- **Shut the Box** — roll dice and shut tiles that sum to the roll
+- **Word Ladder** — change one letter at a time to reach the target word
+- **Matching** — flip cards to find pairs
 
-## Run Locally
+## Features
 
-**Prerequisites:**  Node.js
+- Bilingual UI (中文 / English) with a language switcher
+- Personalized avatars and player setup
+- Save / load game state
+- Background music with mute toggle
+- Responsive layout for desktop and mobile
 
+## Run locally
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+**Prerequisites:** Node.js 18+
+
+```bash
+npm install
+npm run dev
+```
+
+The dev server starts on http://localhost:3000.
+
+## Build
+
+```bash
+npm run build
+npm run preview
+```
+
+## Deployment
+
+The app is configured for GitHub Pages under the `/playground-game/` base path (see `vite.config.ts`). Build output is emitted to `dist/`.
+
+## Project layout
+
+```
+components/   Game screens and shared UI
+context/      React context providers (language, etc.)
+hooks/        Custom hooks
+locales/      en.ts / zh.ts translation strings
+utils/        Game logic helpers
+public/       Static assets bundled by Vite
+```
