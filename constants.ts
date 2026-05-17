@@ -24,8 +24,8 @@ export const CATEGORIES: CategoryDetails[] = [
 export const AVATARS = ['dog', 'rabbit'];
 
 export const AVATAR_IMAGES: { [key: string]: string } = {
-    'dog': '/doggo.png',
-    'rabbit': '/bunny.png',
+    'dog': `${import.meta.env.BASE_URL}doggo.png`,
+    'rabbit': `${import.meta.env.BASE_URL}bunny.png`,
 };
 
 
