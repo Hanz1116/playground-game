@@ -1,0 +1,6 @@
+{
+  "name": "老狗&老婆的游乐园",
+  "description": "A complete, two-player Yahtzee game built with React, TypeScript, and Tailwind CSS. Features full game logic, charming personalized avatars, localization (zh/en), save/load functionality, and a responsive design for a premium pass-and-play experience.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
