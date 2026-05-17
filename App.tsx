@@ -6,6 +6,7 @@ import { DotsAndBoxesGame } from './components/DotsAndBoxesGame';
 import { ShutTheBoxGame } from './components/ShutTheBoxGame';
 import { WordLadderGame } from './components/WordLadderGame';
 import { useBackgroundMusic } from './hooks/useBackgroundMusic';
+import type { TrackKey } from './hooks/musicTracks';
 
 export type View = 'home' | 'yahtzee' | 'matching' | 'dotsAndBoxes' | 'shutTheBox' | 'wordLadder';
 
@@ -27,7 +28,8 @@ const SpeakerOffIcon = () => (
 
 const App: React.FC = () => {
     const [currentView, setCurrentView] = useState<View>('home');
-    const { isMuted, toggleMute } = useBackgroundMusic();
+    // View names happen to match the music track keys, so we can pass it directly.
+    const { isMuted, toggleMute } = useBackgroundMusic(currentView as TrackKey);
 
     const handleStartYahtzee = useCallback(() => {
         setCurrentView('yahtzee');
