@@ -10,6 +10,8 @@ interface HomeScreenProps {
     onStartShutTheBox: () => void;
     onStartWordLadder: () => void;
     onStartBattleship: () => void;
+    onPlayOnline: () => void;
+    isOnline: boolean;
 }
 
 const GameCard: React.FC<{
@@ -36,7 +38,7 @@ const GameCard: React.FC<{
     );
 };
 
-export const HomeScreen: React.FC<HomeScreenProps> = ({ onStartYahtzee, onStartMatching, onStartDotsAndBoxes, onStartShutTheBox, onStartWordLadder, onStartBattleship }) => {
+export const HomeScreen: React.FC<HomeScreenProps> = ({ onStartYahtzee, onStartMatching, onStartDotsAndBoxes, onStartShutTheBox, onStartWordLadder, onStartBattleship, onPlayOnline, isOnline }) => {
     const { t } = useI18n();
 
     return (
@@ -53,6 +55,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onStartYahtzee, onStartM
                     {t('appName')}
                 </h1>
                 <p className="text-xl text-slate-600 mt-2">{t('home.selectGame')}</p>
+                {!isOnline && (
+                    <button
+                        onClick={onPlayOnline}
+                        className="mt-5 inline-flex items-center gap-2 px-6 py-3 bg-cyan-500 text-white font-bold rounded-full shadow-md hover:bg-cyan-400 transition-colors"
+                    >
+                        <i className="fas fa-wifi"></i>
+                        {t('online.playOnline')}
+                    </button>
+                )}
             </header>
 
             <main className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl w-full">

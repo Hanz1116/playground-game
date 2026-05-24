@@ -3,9 +3,11 @@ import { PlayerSetupModal } from './PlayerSetupModal';
 import { GameOverModal } from './GameOverModal';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { GameRulesModal } from './GameRulesModal';
+import { OnlineWaiting, TurnBanner } from './OnlineStatus';
 import { Card } from './Card';
 import { MatchingGameState, MatchingPlayer, CardData, GameStatus } from '../types';
 import { useI18n } from '../hooks/useI18n';
+import { useNetworkedGame } from '../hooks/useNetworkedGame';
 import { AVATAR_IMAGES } from '../constants';
 
 const ICONS = ['🐶', '🐰', '🥕', '🦴', '❤️', '🌟', '🎉', '🎁'];
@@ -33,7 +35,7 @@ interface MatchingGameProps {
 }
 
 export const MatchingGame: React.FC<MatchingGameProps> = ({ onGoHome }) => {
-    const [gameState, setGameState] = useState<MatchingGameState | null>(null);
+    const { gameState, setGameState, isOnline, isMyTurn, players: onlinePlayers, mySeat } = useNetworkedGame<MatchingGameState>('matching');
     const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
     const { t } = useI18n();
 
@@ -51,7 +53,16 @@ export const MatchingGame: React.FC<MatchingGameProps> = ({ onGoHome }) => {
         });
     }, []);
 
+    // Online: the host shuffles the grid and broadcasts it so both devices see
+    // the same layout (the shuffle is random, so it can't be derived locally).
+    useEffect(() => {
+        if (isOnline && !gameState && onlinePlayers && mySeat === 1) {
+            initializeGame(onlinePlayers.p1.name, onlinePlayers.p1.avatar, onlinePlayers.p2.name, onlinePlayers.p2.avatar);
+        }
+    }, [isOnline, gameState, onlinePlayers, mySeat, initializeGame]);
+
     const handleCardClick = (id: number) => {
+        if (isOnline && !isMyTurn) return;
         if (!gameState || gameState.isChecking || gameState.flippedIndices.length >= 2) return;
 
         const cardIndex = gameState.grid.findIndex(card => card.id === id);
@@ -73,8 +84,10 @@ export const MatchingGame: React.FC<MatchingGameProps> = ({ onGoHome }) => {
         setGameState(null);
     };
 
-    // Effect to check for matches
+    // Effect to check for matches. Online, only the active player's device runs
+    // the resolution timer; the result is broadcast to the other device.
     useEffect(() => {
+        if (isOnline && !isMyTurn) return;
         if (!gameState || gameState.flippedIndices.length < 2) return;
 
         setGameState(prev => prev ? { ...prev, isChecking: true } : null);
@@ -134,6 +147,7 @@ export const MatchingGame: React.FC<MatchingGameProps> = ({ onGoHome }) => {
     }, [gameState, t]);
 
     if (!gameState) {
+        if (isOnline) return <OnlineWaiting onGoHome={onGoHome} />;
         return <PlayerSetupModal onStart={initializeGame} onGoHome={onGoHome} />;
     }
 
@@ -178,6 +192,7 @@ export const MatchingGame: React.FC<MatchingGameProps> = ({ onGoHome }) => {
             <header className="w-full max-w-7xl mb-4 text-center relative">
                 <h1 className="text-4xl md:text-5xl font-bold text-slate-800 tracking-wider">{t('games.matchingPair.title')}</h1>
                  <div className="text-lg text-slate-500 mt-1">{currentPlayer.name + t('matchingGame.turn')}</div>
+                 {isOnline && <TurnBanner isMyTurn={isMyTurn} currentName={currentPlayer.name} />}
                 <div className="absolute top-0 left-2 flex items-center gap-2">
                     <button onClick={onGoHome} className="px-3 py-2 bg-white/50 text-slate-700 rounded-lg hover:bg-white/80 transition-colors">
                         &larr; {t('button.backToHome')}

@@ -89,7 +89,16 @@ export const zh = {
         miss: "未中。",
         sunk: "击沉一艘！",
         endTurn: "结束回合",
-        hitsTaken: "被击中: {n} / {total}"
+        hitsTaken: "被击中: {n} / {total}",
+        online: {
+            placeYourFleet: "布置你的舰队 —— 对手看不到",
+            waitingOpponent: "舰队就绪！正在等待 {name} 布阵…",
+            yourTurnFire: "轮到你了 —— 向敌方开炮！",
+            opponentTurnFire: "{name} 正在瞄准…",
+            firing: "开炮中…",
+            youWin: "你击沉了敌方全部舰队！",
+            youLose: "你的舰队被全歼了。"
+        }
     },
     wordLadderGame: {
         startWord: "起始词",
@@ -235,5 +244,35 @@ export const zh = {
         ariaLabel: "骰子点数 {value}, 状态: {status}",
         held: "已锁定",
         notHeld: "未锁定"
+    },
+    online: {
+        playOnline: "联机对战（两台设备）",
+        title: "两台设备一起玩",
+        subtitle: "同一 Wi-Fi 或任意网络 —— 分享房间码即可一起玩。",
+        yourName: "你的昵称",
+        create: "创建房间",
+        join: "加入房间",
+        creating: "正在创建房间…",
+        waitingForPlayer: "正在等待另一位玩家加入…",
+        roomCode: "房间码",
+        shareCode: "把这个房间码分享给对方：",
+        enterCode: "输入房间码",
+        connect: "连接",
+        connecting: "正在连接…",
+        back: "返回",
+        cancel: "取消",
+        connected: "已连接",
+        leave: "退出",
+        online: "联机中",
+        waitingForHost: "已连接！等待 {name} 选择游戏…",
+        waitingForGame: "正在等待游戏开始…",
+        yourTurn: "轮到你了",
+        theirTurn: "轮到 {name} 了 —— 请稍候…",
+        you: "你",
+        errors: {
+            roomNotFound: "找不到房间，请检查房间码。",
+            connectionLost: "连接已断开，请尝试重新连接。",
+            peerError: "出错了，请重试。"
+        }
     }
 };

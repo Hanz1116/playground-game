@@ -5,10 +5,12 @@ import { GameOverModal, DisplayPlayer } from './GameOverModal';
 import { PlayerSetupModal } from './PlayerSetupModal';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { GameRulesModal } from './GameRulesModal';
+import { OnlineWaiting, TurnBanner } from './OnlineStatus';
 import { GameState, Player, Category, Scores, GameStatus, AvatarState, AchievementId } from '../types';
 import { CATEGORIES, EMOTE_MESSAGE_KEYS, ACHIEVEMENTS } from '../constants';
 import { calculatePotentialScores } from '../utils/scoreCalculator';
 import { useI18n } from '../hooks/useI18n';
+import { useNetworkedGame } from '../hooks/useNetworkedGame';
 
 const getInitialScores = (): Scores => {
     const scores: Partial<Scores> = {};
@@ -31,7 +33,7 @@ interface YahtzeeGameProps {
 }
 
 export const YahtzeeGame: React.FC<YahtzeeGameProps> = ({ onGoHome }) => {
-    const [gameState, setGameState] = useState<GameState | null>(null);
+    const { gameState, setGameState, isOnline, isMyTurn, players: onlinePlayers, mySeat } = useNetworkedGame<GameState>('yahtzee');
     const [isRolling, setIsRolling] = useState(false);
     const [lastAchievement, setLastAchievement] = useState<AchievementId | null>(null);
     const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
@@ -69,11 +71,19 @@ export const YahtzeeGame: React.FC<YahtzeeGameProps> = ({ onGoHome }) => {
     }, []);
 
     useEffect(() => {
+        if (isOnline) return; // online state comes from the peer, not local storage
         const savedGame = localStorage.getItem('yahtzeeGameState');
         if (savedGame) {
             setGameState(JSON.parse(savedGame));
         }
-    }, []);
+    }, [isOnline]);
+
+    // Online: host creates the opening hand and broadcasts it.
+    useEffect(() => {
+        if (isOnline && !gameState && onlinePlayers && mySeat === 1) {
+            initializeGame(onlinePlayers.p1.name, onlinePlayers.p1.avatar, onlinePlayers.p2.name, onlinePlayers.p2.avatar);
+        }
+    }, [isOnline, gameState, onlinePlayers, mySeat, initializeGame]);
     
     const currentPlayer = useMemo(() => {
         if (!gameState) return null;
@@ -92,6 +102,7 @@ export const YahtzeeGame: React.FC<YahtzeeGameProps> = ({ onGoHome }) => {
     }, []);
 
     const handleRollDice = () => {
+        if (isOnline && !isMyTurn) return;
         if (!gameState || gameState.rollsLeft === 0 || isRolling || !currentPlayer) return;
 
         setIsRolling(true);
@@ -128,6 +139,7 @@ export const YahtzeeGame: React.FC<YahtzeeGameProps> = ({ onGoHome }) => {
     };
 
     const handleToggleHold = (index: number) => {
+        if (isOnline && !isMyTurn) return;
         if (!gameState || gameState.rollsLeft === 3) return;
         setGameState(prev => {
             if (!prev) return null;
@@ -143,6 +155,7 @@ export const YahtzeeGame: React.FC<YahtzeeGameProps> = ({ onGoHome }) => {
     };
 
     const handleScoreCategory = (category: Category) => {
+        if (isOnline && !isMyTurn) return;
         if (!gameState || !currentPlayer || currentPlayer.scores[category] !== null || gameState.rollsLeft === 3) return;
         
         const isYahtzeeRoll = (gameState.potentialScores.yahtzee || 0) > 0;
@@ -236,6 +249,7 @@ export const YahtzeeGame: React.FC<YahtzeeGameProps> = ({ onGoHome }) => {
     };
 
     const handleEmote = () => {
+        if (isOnline && !isMyTurn) return;
         if (!gameState || !currentPlayer) return;
         const targetPlayerId = currentPlayer.id === 1 ? 2 : 1;
         const messageKey = EMOTE_MESSAGE_KEYS[Math.floor(Math.random() * EMOTE_MESSAGE_KEYS.length)];
@@ -255,6 +269,7 @@ export const YahtzeeGame: React.FC<YahtzeeGameProps> = ({ onGoHome }) => {
     }, [gameState, t]);
 
     if (!gameState) {
+        if (isOnline) return <OnlineWaiting onGoHome={onGoHome} />;
         return <PlayerSetupModal onStart={initializeGame} onGoHome={onGoHome} />;
     }
 
@@ -318,6 +333,7 @@ export const YahtzeeGame: React.FC<YahtzeeGameProps> = ({ onGoHome }) => {
             <header className="w-full max-w-7xl mb-4 text-center relative">
                 <h1 className="text-4xl md:text-5xl font-bold text-slate-800 tracking-wider">{t('games.yahtzee.title')}</h1>
                 <div className="text-lg text-slate-500 mt-1">{t('game.round', { current: gameState.currentRound > 13 ? 13 : gameState.currentRound, total: 13 })}</div>
+                {isOnline && currentPlayer && <TurnBanner isMyTurn={isMyTurn} currentName={currentPlayer.name} />}
                 <div className="absolute top-0 left-2 flex items-center gap-2">
                     <button onClick={onGoHome} className="px-3 py-2 bg-white/50 text-slate-700 rounded-lg hover:bg-white/80 transition-colors">
                         &larr; {t('button.backToHome')}
@@ -381,9 +397,11 @@ export const YahtzeeGame: React.FC<YahtzeeGameProps> = ({ onGoHome }) => {
                             <i className="fas fa-heart"></i>
                         </button>
                         <div className="flex gap-2">
-                             <button onClick={handleSaveGame} className="w-24 px-4 py-2 bg-slate-500 text-white font-semibold rounded-lg shadow-md hover:bg-slate-400 transition-colors duration-300">
-                                {t('button.save')}
-                            </button>
+                             {!isOnline && (
+                                <button onClick={handleSaveGame} className="w-24 px-4 py-2 bg-slate-500 text-white font-semibold rounded-lg shadow-md hover:bg-slate-400 transition-colors duration-300">
+                                    {t('button.save')}
+                                </button>
+                             )}
                             <button onClick={handleNewGame} className="w-24 px-4 py-2 bg-slate-500 text-white font-semibold rounded-lg shadow-md hover:bg-slate-400 transition-colors duration-300">
                                 {t('button.newGame')}
                             </button>

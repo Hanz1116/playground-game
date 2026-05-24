@@ -3,9 +3,11 @@ import { PlayerSetupModal } from './PlayerSetupModal';
 import { GameOverModal, DisplayPlayer } from './GameOverModal';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { GameRulesModal } from './GameRulesModal';
+import { OnlineWaiting, TurnBanner } from './OnlineStatus';
 import { WordLadderGameState, WordLadderPlayer, GameStatus } from '../types';
 // Fix: Corrected typo from useI1n to useI18n.
 import { useI18n } from '../hooks/useI18n';
+import { useNetworkedGame } from '../hooks/useNetworkedGame';
 import { AVATAR_IMAGES } from '../constants';
 import { FOUR_LETTER_WORDS } from '../utils/wordlist';
 
@@ -38,7 +40,7 @@ interface WordLadderGameProps {
 }
 
 export const WordLadderGame: React.FC<WordLadderGameProps> = ({ onGoHome }) => {
-    const [gameState, setGameState] = useState<WordLadderGameState | null>(null);
+    const { gameState, setGameState, isOnline, isMyTurn, players: onlinePlayers, mySeat } = useNetworkedGame<WordLadderGameState>('wordLadder');
     const [guess, setGuess] = useState('');
     const [unrecognizedWord, setUnrecognizedWord] = useState<string | null>(null);
     const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
@@ -65,12 +67,20 @@ export const WordLadderGame: React.FC<WordLadderGameProps> = ({ onGoHome }) => {
         listEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [gameState?.wordHistory]);
 
+    // Online: host picks the random start/end pair and broadcasts it.
+    useEffect(() => {
+        if (isOnline && !gameState && onlinePlayers && mySeat === 1) {
+            initializeGame(onlinePlayers.p1.name, onlinePlayers.p1.avatar, onlinePlayers.p2.name, onlinePlayers.p2.avatar);
+        }
+    }, [isOnline, gameState, onlinePlayers, mySeat, initializeGame]);
+
     const handleNewGame = () => {
         setGameState(null);
         setUnrecognizedWord(null);
     };
 
     const processWordSubmission = (wordToSubmit: string) => {
+        if (isOnline && !isMyTurn) return;
         if (!gameState) return;
 
         setGameState(prev => prev ? { ...prev, errorMessage: null } : null);
@@ -132,8 +142,11 @@ export const WordLadderGame: React.FC<WordLadderGameProps> = ({ onGoHome }) => {
     const p1Color = 'amber';
     const p2Color = 'pink';
     
-    if (!gameState) return <PlayerSetupModal onStart={initializeGame} onGoHome={onGoHome} />;
-    
+    if (!gameState) {
+        if (isOnline) return <OnlineWaiting onGoHome={onGoHome} />;
+        return <PlayerSetupModal onStart={initializeGame} onGoHome={onGoHome} />;
+    }
+
     const { players, currentPlayerId, startWord, endWord, wordHistory, errorMessage, winner, gameStatus } = gameState;
     const currentPlayer = players.find(p => p.id === currentPlayerId)!;
     const [p1, p2] = players;
@@ -178,6 +191,7 @@ export const WordLadderGame: React.FC<WordLadderGameProps> = ({ onGoHome }) => {
             <header className="w-full max-w-7xl mb-4 text-center relative">
                 <h1 className="text-4xl md:text-5xl font-bold text-slate-800 tracking-wider">{t('games.wordLadder.title')}</h1>
                 <div className="text-lg text-slate-500 mt-1">{t('game.playersTurn', { name: currentPlayer.name })}</div>
+                {isOnline && <TurnBanner isMyTurn={isMyTurn} currentName={currentPlayer.name} />}
                 <div className="absolute top-0 left-2 flex items-center gap-2">
                     <button onClick={onGoHome} className="px-3 py-2 bg-white/50 text-slate-700 rounded-lg hover:bg-white/80 transition-colors">&larr; {t('button.backToHome')}</button>
                     <button onClick={handleNewGame} className="px-3 py-2 bg-slate-500/80 text-white rounded-lg hover:bg-slate-500 transition-colors">{t('button.newGame')}</button>
@@ -223,13 +237,14 @@ export const WordLadderGame: React.FC<WordLadderGameProps> = ({ onGoHome }) => {
                     </div>
                     
                     <form onSubmit={handleSubmitWord} className="w-full flex flex-col items-center gap-2">
-                        <input 
+                        <input
                             type="text"
                             value={guess}
                             onChange={(e) => setGuess(e.target.value)}
                             maxLength={4}
+                            disabled={isOnline && !isMyTurn}
                             placeholder={t('wordLadderGame.enterWord')}
-                            className="w-full p-3 text-center font-mono tracking-widest text-2xl border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:outline-none"
+                            className="w-full p-3 text-center font-mono tracking-widest text-2xl border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400"
                             aria-label={t('wordLadderGame.enterWord')}
                         />
                         <div className="h-10 flex flex-col justify-center items-center">
@@ -247,7 +262,7 @@ export const WordLadderGame: React.FC<WordLadderGameProps> = ({ onGoHome }) => {
                                 </div>
                             )}
                         </div>
-                        <button type="submit" className={`w-full px-6 py-3 bg-${currentPlayerId === 1 ? p1Color : p2Color}-500 text-slate-900 font-bold text-lg rounded-lg shadow-md hover:bg-${currentPlayerId === 1 ? p1Color : p2Color}-400`}>
+                        <button type="submit" disabled={isOnline && !isMyTurn} className={`w-full px-6 py-3 bg-${currentPlayerId === 1 ? p1Color : p2Color}-500 text-slate-900 font-bold text-lg rounded-lg shadow-md hover:bg-${currentPlayerId === 1 ? p1Color : p2Color}-400 disabled:bg-gray-300 disabled:text-gray-500`}>
                             {t('wordLadderGame.submit')}
                         </button>
                     </form>

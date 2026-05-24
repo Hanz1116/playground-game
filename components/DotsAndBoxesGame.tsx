@@ -1,10 +1,12 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { PlayerSetupModal } from './PlayerSetupModal';
 import { GameOverModal } from './GameOverModal';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { GameRulesModal } from './GameRulesModal';
+import { OnlineWaiting, TurnBanner } from './OnlineStatus';
 import { DotsAndBoxesGameState, DotsAndBoxesPlayer, GameStatus } from '../types';
 import { useI18n } from '../hooks/useI18n';
+import { useNetworkedGame } from '../hooks/useNetworkedGame';
 import { AVATAR_IMAGES } from '../constants';
 
 const GRID_SIZE = 5; // 5 dots, so 4x4 boxes
@@ -30,7 +32,7 @@ interface DotsAndBoxesGameProps {
 }
 
 export const DotsAndBoxesGame: React.FC<DotsAndBoxesGameProps> = ({ onGoHome }) => {
-    const [gameState, setGameState] = useState<DotsAndBoxesGameState | null>(null);
+    const { gameState, setGameState, isOnline, isMyTurn, players: onlinePlayers, mySeat } = useNetworkedGame<DotsAndBoxesGameState>('dotsAndBoxes');
     const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
     const { t } = useI18n();
 
@@ -47,11 +49,19 @@ export const DotsAndBoxesGame: React.FC<DotsAndBoxesGameProps> = ({ onGoHome }) 
         });
     }, []);
 
+    // Online: the host seeds the initial board and broadcasts it to the guest.
+    useEffect(() => {
+        if (isOnline && !gameState && onlinePlayers && mySeat === 1) {
+            initializeGame(onlinePlayers.p1.name, onlinePlayers.p1.avatar, onlinePlayers.p2.name, onlinePlayers.p2.avatar);
+        }
+    }, [isOnline, gameState, onlinePlayers, mySeat, initializeGame]);
+
     const handleNewGame = () => {
         setGameState(null);
     };
-    
+
     const handleLineClick = (row: number, col: number, type: 'horizontal' | 'vertical') => {
+        if (isOnline && !isMyTurn) return;
         if (!gameState || gameState.gameStatus !== GameStatus.IN_PROGRESS) return;
 
         const { horizontalLines, verticalLines } = gameState;
@@ -116,6 +126,7 @@ export const DotsAndBoxesGame: React.FC<DotsAndBoxesGameProps> = ({ onGoHome }) 
     }, [gameState, t]);
     
     if (!gameState) {
+        if (isOnline) return <OnlineWaiting onGoHome={onGoHome} />;
         return <PlayerSetupModal onStart={initializeGame} onGoHome={onGoHome} />;
     }
 
@@ -166,6 +177,7 @@ export const DotsAndBoxesGame: React.FC<DotsAndBoxesGameProps> = ({ onGoHome }) 
             <header className="w-full max-w-7xl mb-4 text-center relative">
                 <h1 className="text-4xl md:text-5xl font-bold text-slate-800 tracking-wider">{t('games.dotsAndBoxes.title')}</h1>
                 <div className="text-lg text-slate-500 mt-1">{t('game.playersTurn', { name: currentPlayer.name })}</div>
+                {isOnline && <TurnBanner isMyTurn={isMyTurn} currentName={currentPlayer.name} />}
                  <div className="absolute top-0 left-2 flex items-center gap-2">
                     <button onClick={onGoHome} className="px-3 py-2 bg-white/50 text-slate-700 rounded-lg hover:bg-white/80 transition-colors">
                         &larr; {t('button.backToHome')}

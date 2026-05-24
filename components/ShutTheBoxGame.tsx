@@ -1,10 +1,12 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { PlayerSetupModal } from './PlayerSetupModal';
 import { GameOverModal, DisplayPlayer } from './GameOverModal';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { GameRulesModal } from './GameRulesModal';
+import { OnlineWaiting, TurnBanner } from './OnlineStatus';
 import { ShutTheBoxGameState, ShutTheBoxPlayer, Tile, GameStatus } from '../types';
 import { useI18n } from '../hooks/useI18n';
+import { useNetworkedGame } from '../hooks/useNetworkedGame';
 import { AVATAR_IMAGES } from '../constants';
 import { Die } from './Die';
 
@@ -92,7 +94,7 @@ interface ShutTheBoxGameProps {
 }
 
 export const ShutTheBoxGame: React.FC<ShutTheBoxGameProps> = ({ onGoHome }) => {
-    const [gameState, setGameState] = useState<ShutTheBoxGameState | null>(null);
+    const { gameState, setGameState, isOnline, isMyTurn, players: onlinePlayers, mySeat } = useNetworkedGame<ShutTheBoxGameState>('shutTheBox');
     const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
     const { t } = useI18n();
 
@@ -109,9 +111,16 @@ export const ShutTheBoxGame: React.FC<ShutTheBoxGameProps> = ({ onGoHome }) => {
         });
     }, []);
 
+    useEffect(() => {
+        if (isOnline && !gameState && onlinePlayers && mySeat === 1) {
+            initializeGame(onlinePlayers.p1.name, onlinePlayers.p1.avatar, onlinePlayers.p2.name, onlinePlayers.p2.avatar);
+        }
+    }, [isOnline, gameState, onlinePlayers, mySeat, initializeGame]);
+
     const handleNewGame = () => setGameState(null);
 
     const handleRoll = () => {
+        if (isOnline && !isMyTurn) return;
         if (!gameState || gameState.turnPhase !== 'ROLL' || gameState.isRolling) return;
         setGameState(prev => prev ? { ...prev, isRolling: true } : null);
         
@@ -134,6 +143,7 @@ export const ShutTheBoxGame: React.FC<ShutTheBoxGameProps> = ({ onGoHome }) => {
     };
 
     const handleTileClick = (tileNumber: number) => {
+        if (isOnline && !isMyTurn) return;
         if (!gameState || gameState.turnPhase !== 'SELECT') return;
         const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId)!;
         if (!currentPlayer.tiles.find(t => t.number === tileNumber)?.isOpen) return;
@@ -148,6 +158,7 @@ export const ShutTheBoxGame: React.FC<ShutTheBoxGameProps> = ({ onGoHome }) => {
     };
     
     const handleConfirmMove = () => {
+        if (isOnline && !isMyTurn) return;
         if (!gameState) return;
         setGameState(prev => {
             if (!prev) return null;
@@ -175,8 +186,9 @@ export const ShutTheBoxGame: React.FC<ShutTheBoxGameProps> = ({ onGoHome }) => {
     };
     
     const handleEndTurn = () => {
+        if (isOnline && !isMyTurn) return;
         if (!gameState) return;
-        
+
         setGameState(prev => {
             if (!prev) return null;
             const currentPlayer = prev.players.find(p => p.id === prev.currentPlayerId)!;
@@ -213,7 +225,10 @@ export const ShutTheBoxGame: React.FC<ShutTheBoxGameProps> = ({ onGoHome }) => {
     const p1Color = 'amber';
     const p2Color = 'pink';
     
-    if (!gameState) return <PlayerSetupModal onStart={initializeGame} onGoHome={onGoHome} />;
+    if (!gameState) {
+        if (isOnline) return <OnlineWaiting onGoHome={onGoHome} />;
+        return <PlayerSetupModal onStart={initializeGame} onGoHome={onGoHome} />;
+    }
 
     if (gameState.gameStatus === GameStatus.GAME_OVER && winner) {
         const displayPlayers: [DisplayPlayer, DisplayPlayer] = [
@@ -260,6 +275,7 @@ export const ShutTheBoxGame: React.FC<ShutTheBoxGameProps> = ({ onGoHome }) => {
             <header className="w-full max-w-7xl mb-4 text-center relative">
                 <h1 className="text-4xl md:text-5xl font-bold text-slate-800 tracking-wider">{t('games.shutTheBox.title')}</h1>
                 <div className="text-lg text-slate-500 mt-1">{t('game.playersTurn', { name: currentPlayer.name })}</div>
+                {isOnline && <TurnBanner isMyTurn={isMyTurn} currentName={currentPlayer.name} />}
                 <div className="absolute top-0 left-2 flex items-center gap-2">
                     <button onClick={onGoHome} className="px-3 py-2 bg-white/50 text-slate-700 rounded-lg hover:bg-white/80 transition-colors">&larr; {t('button.backToHome')}</button>
                     <button onClick={handleNewGame} className="px-3 py-2 bg-slate-500/80 text-white rounded-lg hover:bg-slate-500 transition-colors">{t('button.newGame')}</button>

@@ -89,7 +89,16 @@ export const en = {
         miss: "Miss.",
         sunk: "Ship Sunk!",
         endTurn: "End Turn",
-        hitsTaken: "Hits taken: {n} / {total}"
+        hitsTaken: "Hits taken: {n} / {total}",
+        online: {
+            placeYourFleet: "Place your fleet — your opponent can't see it",
+            waitingOpponent: "Fleet ready! Waiting for {name} to place their ships…",
+            yourTurnFire: "Your turn — fire at the enemy!",
+            opponentTurnFire: "{name} is taking aim…",
+            firing: "Firing…",
+            youWin: "You sank the whole enemy fleet!",
+            youLose: "Your fleet was sunk."
+        }
     },
     wordLadderGame: {
         startWord: "Start Word",
@@ -235,5 +244,35 @@ export const en = {
         ariaLabel: "Die with value {value}, status: {status}",
         held: "held",
         notHeld: "not held"
+    },
+    online: {
+        playOnline: "Play Online (2 devices)",
+        title: "Play on Two Devices",
+        subtitle: "Same Wi-Fi or anywhere — share a room code to play together.",
+        yourName: "Your name",
+        create: "Create a room",
+        join: "Join a room",
+        creating: "Creating room…",
+        waitingForPlayer: "Waiting for the other player to join…",
+        roomCode: "Room code",
+        shareCode: "Share this code with the other player:",
+        enterCode: "Enter room code",
+        connect: "Connect",
+        connecting: "Connecting…",
+        back: "Back",
+        cancel: "Cancel",
+        connected: "Connected",
+        leave: "Leave",
+        online: "Online",
+        waitingForHost: "Connected! Waiting for {name} to pick a game…",
+        waitingForGame: "Waiting for the game to start…",
+        yourTurn: "Your turn",
+        theirTurn: "{name}'s turn — waiting…",
+        you: "you",
+        errors: {
+            roomNotFound: "Room not found. Double-check the code.",
+            connectionLost: "Connection lost. Try reconnecting.",
+            peerError: "Something went wrong. Please try again."
+        }
     }
 };

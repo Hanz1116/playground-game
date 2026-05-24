@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { HomeScreen } from './components/HomeScreen';
 import { YahtzeeGame } from './components/YahtzeeGame';
 import { MatchingGame } from './components/MatchingGame';
@@ -6,7 +6,10 @@ import { DotsAndBoxesGame } from './components/DotsAndBoxesGame';
 import { ShutTheBoxGame } from './components/ShutTheBoxGame';
 import { WordLadderGame } from './components/WordLadderGame';
 import { BattleshipGame } from './components/BattleshipGame';
+import { OnlineLobby } from './components/OnlineLobby';
+import { OnlineBar } from './components/OnlineStatus';
 import { useBackgroundMusic } from './hooks/useBackgroundMusic';
+import { useNetwork } from './context/NetworkContext';
 import type { TrackKey } from './hooks/musicTracks';
 
 export type View = 'home' | 'yahtzee' | 'matching' | 'dotsAndBoxes' | 'shutTheBox' | 'wordLadder' | 'battleship';
@@ -29,8 +32,38 @@ const SpeakerOffIcon = () => (
 
 const App: React.FC = () => {
     const [currentView, setCurrentView] = useState<View>('home');
+    const [showLobby, setShowLobby] = useState(false);
     // View names happen to match the music track keys, so we can pass it directly.
     const { isMuted, toggleMute } = useBackgroundMusic(currentView as TrackKey);
+    const net = useNetwork();
+
+    // Keep both devices on the same screen. Track the last view we received from
+    // the peer so re-broadcasting it doesn't bounce back and forth.
+    const remoteViewRef = useRef<View | undefined>(undefined);
+    useEffect(() => {
+        if (!net.isOnline) return;
+        const unsub = net.subscribe('view', (msg) => {
+            remoteViewRef.current = msg.view as View;
+            setCurrentView(msg.view as View);
+        });
+        return unsub;
+    }, [net.isOnline, net.subscribe]);
+
+    useEffect(() => {
+        if (!net.isOnline) return;
+        if (currentView === remoteViewRef.current) return;
+        net.send({ kind: 'view', view: currentView });
+    }, [currentView, net.isOnline, net.send]);
+
+    // Once connected, swap the lobby for the home screen. When a session ends,
+    // fall back home so we never linger on a now-dead game.
+    useEffect(() => {
+        if (net.isOnline) setShowLobby(false);
+        if (net.status === 'idle') {
+            remoteViewRef.current = undefined;
+            setCurrentView('home');
+        }
+    }, [net.isOnline, net.status]);
 
     const handleStartYahtzee = useCallback(() => {
         setCurrentView('yahtzee');
@@ -83,6 +116,8 @@ const App: React.FC = () => {
                     onStartShutTheBox={handleStartShutTheBox}
                     onStartWordLadder={handleStartWordLadder}
                     onStartBattleship={handleStartBattleship}
+                    onPlayOnline={() => setShowLobby(true)}
+                    isOnline={net.isOnline}
                 />;
         }
     };
@@ -96,7 +131,16 @@ const App: React.FC = () => {
                 backgroundAttachment: 'fixed',
             }}
         >
+            {net.isOnline && net.players && (
+                <OnlineBar
+                    roomCode={net.roomCode}
+                    p1Name={net.players.p1.name}
+                    p2Name={net.players.p2.name}
+                    onLeave={net.leave}
+                />
+            )}
             {renderView()}
+            {showLobby && !net.isOnline && <OnlineLobby onClose={() => setShowLobby(false)} />}
             <button
                 onClick={toggleMute}
                 title={isMuted ? 'Unmute music' : 'Mute music'}
