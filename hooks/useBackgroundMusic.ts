@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import * as Tone from 'tone';
 import { TRACKS, type TrackKey, type TrackController } from './musicTracks';
+import { setSfxMuted } from './soundEffects';
 
 export function useBackgroundMusic(trackKey: TrackKey) {
   const [isMuted, setIsMuted] = useState(false);
@@ -78,6 +79,7 @@ export function useBackgroundMusic(trackKey: TrackKey) {
   const toggleMute = useCallback(() => {
     isMutedRef.current = !isMutedRef.current;
     setIsMuted(isMutedRef.current);
+    setSfxMuted(isMutedRef.current);
     const master = masterRef.current;
     if (master) {
       const t = Tone.now();

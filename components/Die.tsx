@@ -1,5 +1,6 @@
 import React from 'react';
 import { useI18n } from '../hooks/useI18n';
+import { playSfx } from '../hooks/soundEffects';
 
 interface DieProps {
     value: number;
@@ -54,6 +55,7 @@ export const Die: React.FC<DieProps> = ({ value, isHeld, onToggleHold, isRolling
     
     const handleClick = () => {
         if(canHold) {
+            playSfx('toggle');
             onToggleHold();
         }
     };

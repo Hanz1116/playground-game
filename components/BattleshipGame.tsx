@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { PlayerSetupModal } from './PlayerSetupModal';
 import { GameOverModal, DisplayPlayer } from './GameOverModal';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -10,6 +10,7 @@ import {
     GameStatus,
 } from '../types';
 import { useI18n } from '../hooks/useI18n';
+import { playSfx } from '../hooks/soundEffects';
 import { AVATAR_IMAGES } from '../constants';
 import {
     BoardGrid,
@@ -91,6 +92,11 @@ const OnlineBattleshipView: React.FC<{ online: OnlineBattleship; onGoHome: () =>
     const { t } = useI18n();
     const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
     const myColor: 'amber' | 'pink' = online.mySeat === 1 ? 'amber' : 'pink';
+
+    // Play the outcome of each shot we fire as its result arrives.
+    useEffect(() => {
+        if (online.result && online.lastShot) playSfx(online.result);
+    }, [online.result, online.lastShot]);
 
     const statusLine = (() => {
         switch (online.phase) {
@@ -263,6 +269,21 @@ export const BattleshipGame: React.FC<BattleshipGameProps> = ({ onGoHome }) => {
     };
 
     const handleFire = (x: number, y: number) => {
+        // Sound the result up front from the current state (the updater must stay
+        // side-effect free, and React may invoke it more than once).
+        if (gameState && gameState.phase === 'FIRING') {
+            const opponentId = gameState.currentPlayerId === 1 ? 2 : 1;
+            const opponent = gameState.players.find(p => p.id === opponentId)!;
+            if (!shotAt(opponent.board, x, y)) {
+                const hitShip = shipAtCell(opponent.board, x, y);
+                if (hitShip) {
+                    playSfx(hitShip.hits + 1 >= hitShip.length ? 'sunk' : 'hit');
+                } else {
+                    playSfx('miss');
+                }
+            }
+        }
+
         setGameState(prev => {
             if (!prev || prev.phase !== 'FIRING') return prev;
             const opponentId = prev.currentPlayerId === 1 ? 2 : 1;

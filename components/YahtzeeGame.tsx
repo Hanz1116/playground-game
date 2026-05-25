@@ -11,6 +11,7 @@ import { CATEGORIES, EMOTE_MESSAGE_KEYS, ACHIEVEMENTS } from '../constants';
 import { calculatePotentialScores } from '../utils/scoreCalculator';
 import { useI18n } from '../hooks/useI18n';
 import { useNetworkedGame } from '../hooks/useNetworkedGame';
+import { playSfx } from '../hooks/soundEffects';
 
 const getInitialScores = (): Scores => {
     const scores: Partial<Scores> = {};
@@ -106,6 +107,7 @@ export const YahtzeeGame: React.FC<YahtzeeGameProps> = ({ onGoHome }) => {
         if (!gameState || gameState.rollsLeft === 0 || isRolling || !currentPlayer) return;
 
         setIsRolling(true);
+        playSfx('diceRoll');
         setAvatarState(currentPlayer.id, 'thinking');
 
         setTimeout(() => {
@@ -181,6 +183,7 @@ export const YahtzeeGame: React.FC<YahtzeeGameProps> = ({ onGoHome }) => {
             }
         }
         
+        playSfx('score');
         setGameState(prev => {
             if (!prev) return null;
 

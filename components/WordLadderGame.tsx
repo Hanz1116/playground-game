@@ -8,6 +8,7 @@ import { WordLadderGameState, WordLadderPlayer, GameStatus } from '../types';
 // Fix: Corrected typo from useI1n to useI18n.
 import { useI18n } from '../hooks/useI18n';
 import { useNetworkedGame } from '../hooks/useNetworkedGame';
+import { playSfx } from '../hooks/soundEffects';
 import { AVATAR_IMAGES } from '../constants';
 import { FOUR_LETTER_WORDS } from '../utils/wordlist';
 
@@ -89,22 +90,27 @@ export const WordLadderGame: React.FC<WordLadderGameProps> = ({ onGoHome }) => {
         const lastWord = gameState.wordHistory[gameState.wordHistory.length - 1].word;
 
         if (wordToSubmit.length !== 4) {
+            playSfx('wordError');
             setGameState(prev => prev ? { ...prev, errorMessage: t('wordLadderGame.error.length') } : null);
             return;
         }
         if (wordToSubmit === lastWord) {
+             playSfx('wordError');
              setGameState(prev => prev ? { ...prev, errorMessage: t('wordLadderGame.error.sameAsLast') } : null);
             return;
         }
         if (getLetterDifference(lastWord, wordToSubmit) !== 1) {
+            playSfx('wordError');
             setGameState(prev => prev ? { ...prev, errorMessage: t('wordLadderGame.error.oneLetter') } : null);
             return;
         }
         if (!FOUR_LETTER_WORDS.has(wordToSubmit)) {
+            playSfx('wordError');
             setUnrecognizedWord(wordToSubmit);
             return;
         }
 
+        playSfx('wordValid');
         const newHistory = [...gameState.wordHistory, { word: wordToSubmit, playerId: gameState.currentPlayerId }];
 
         if (wordToSubmit === gameState.endWord) {

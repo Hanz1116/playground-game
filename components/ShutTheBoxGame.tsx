@@ -7,6 +7,7 @@ import { OnlineWaiting, TurnBanner } from './OnlineStatus';
 import { ShutTheBoxGameState, ShutTheBoxPlayer, Tile, GameStatus } from '../types';
 import { useI18n } from '../hooks/useI18n';
 import { useNetworkedGame } from '../hooks/useNetworkedGame';
+import { playSfx } from '../hooks/soundEffects';
 import { AVATAR_IMAGES } from '../constants';
 import { Die } from './Die';
 
@@ -122,6 +123,7 @@ export const ShutTheBoxGame: React.FC<ShutTheBoxGameProps> = ({ onGoHome }) => {
     const handleRoll = () => {
         if (isOnline && !isMyTurn) return;
         if (!gameState || gameState.turnPhase !== 'ROLL' || gameState.isRolling) return;
+        playSfx('diceRoll');
         setGameState(prev => prev ? { ...prev, isRolling: true } : null);
         
         setTimeout(() => {
@@ -147,6 +149,7 @@ export const ShutTheBoxGame: React.FC<ShutTheBoxGameProps> = ({ onGoHome }) => {
         if (!gameState || gameState.turnPhase !== 'SELECT') return;
         const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId)!;
         if (!currentPlayer.tiles.find(t => t.number === tileNumber)?.isOpen) return;
+        playSfx('toggle');
 
         setGameState(prev => {
             if (!prev) return null;
@@ -160,9 +163,10 @@ export const ShutTheBoxGame: React.FC<ShutTheBoxGameProps> = ({ onGoHome }) => {
     const handleConfirmMove = () => {
         if (isOnline && !isMyTurn) return;
         if (!gameState) return;
+        playSfx('score');
         setGameState(prev => {
             if (!prev) return null;
-            
+
             const newPlayers = prev.players.map(p => {
                 if (p.id === prev.currentPlayerId) {
                     const newTiles = p.tiles.map(t => 

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { BattleshipBoard, BattleshipShip } from '../types';
 import { useI18n } from '../hooks/useI18n';
+import { playSfx } from '../hooks/soundEffects';
 import { AVATAR_IMAGES } from '../constants';
 
 export const BOARD_SIZE = 8;
@@ -330,6 +331,7 @@ export const PlacementPanel: React.FC<PlacementPanelProps> = ({
         }
 
         const newShips = board.ships.map(s => (s.id === ship.id ? { ...s, positions } : s));
+        playSfx('place');
         onBoardChange({ ...board, ships: newShips });
         setHoverCell(null);
 

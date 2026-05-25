@@ -7,6 +7,7 @@ import { OnlineWaiting, TurnBanner } from './OnlineStatus';
 import { DotsAndBoxesGameState, DotsAndBoxesPlayer, GameStatus } from '../types';
 import { useI18n } from '../hooks/useI18n';
 import { useNetworkedGame } from '../hooks/useNetworkedGame';
+import { playSfx } from '../hooks/soundEffects';
 import { AVATAR_IMAGES } from '../constants';
 
 const GRID_SIZE = 5; // 5 dots, so 4x4 boxes
@@ -92,9 +93,11 @@ export const DotsAndBoxesGame: React.FC<DotsAndBoxesGameProps> = ({ onGoHome }) 
             }
         }
         
+        playSfx(boxesCompletedThisTurn > 0 ? 'boxClaim' : 'lineDraw');
+
         setGameState(prev => {
             if (!prev) return null;
-            
+
             const newPlayers = [...prev.players] as [DotsAndBoxesPlayer, DotsAndBoxesPlayer];
             if (boxesCompletedThisTurn > 0) {
                  const currentPlayerIndex = prev.players.findIndex(p => p.id === prev.currentPlayerId);

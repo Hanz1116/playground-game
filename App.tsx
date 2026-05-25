@@ -143,7 +143,7 @@ const App: React.FC = () => {
             {showLobby && !net.isOnline && <OnlineLobby onClose={() => setShowLobby(false)} />}
             <button
                 onClick={toggleMute}
-                title={isMuted ? 'Unmute music' : 'Mute music'}
+                title={isMuted ? 'Unmute sound' : 'Mute sound'}
                 className="fixed bottom-4 right-4 z-50 w-10 h-10 rounded-full bg-white/80 shadow-md flex items-center justify-center hover:bg-white transition-colors text-gray-600"
             >
                 {isMuted ? <SpeakerOffIcon /> : <SpeakerOnIcon />}

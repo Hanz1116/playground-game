@@ -8,6 +8,7 @@ import { Card } from './Card';
 import { MatchingGameState, MatchingPlayer, CardData, GameStatus } from '../types';
 import { useI18n } from '../hooks/useI18n';
 import { useNetworkedGame } from '../hooks/useNetworkedGame';
+import { playSfx } from '../hooks/soundEffects';
 import { AVATAR_IMAGES } from '../constants';
 
 const ICONS = ['🐶', '🐰', '🥕', '🦴', '❤️', '🌟', '🎉', '🎁'];
@@ -70,6 +71,7 @@ export const MatchingGame: React.FC<MatchingGameProps> = ({ onGoHome }) => {
 
         const newGrid = [...gameState.grid];
         newGrid[cardIndex].isFlipped = true;
+        playSfx('cardFlip');
 
         const newFlippedIndices = [...gameState.flippedIndices, cardIndex];
 
@@ -99,6 +101,7 @@ export const MatchingGame: React.FC<MatchingGameProps> = ({ onGoHome }) => {
         setTimeout(() => {
             if (firstCard.icon === secondCard.icon) {
                 // It's a match
+                playSfx('match');
                 setGameState(prev => {
                     if (!prev) return null;
                     const newGrid = prev.grid.map(card =>
@@ -121,6 +124,7 @@ export const MatchingGame: React.FC<MatchingGameProps> = ({ onGoHome }) => {
                 });
             } else {
                 // Not a match
+                playSfx('noMatch');
                 setGameState(prev => {
                     if (!prev) return null;
                     const newGrid = [...prev.grid];

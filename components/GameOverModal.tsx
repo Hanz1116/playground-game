@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AvatarState } from '../types';
 import { AVATAR_IMAGES } from '../constants';
 import { useI18n } from '../hooks/useI18n';
+import { playSfx } from '../hooks/soundEffects';
 
 export interface DisplayPlayer {
     id: 1 | 2;
@@ -40,6 +41,11 @@ interface GameOverModalProps {
 export const GameOverModal: React.FC<GameOverModalProps> = ({ winner, players, onNewGame, onGoHome }) => {
     const { t } = useI18n();
     const isTie = winner.name === t('gameOver.tie');
+
+    // Celebrate once when the results appear.
+    useEffect(() => {
+        playSfx('win');
+    }, []);
 
     return (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4">
